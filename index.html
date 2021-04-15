@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="css/docs.css">
+    <script src="js/require.js" data-main="js/master"></script>
+</head>
+<body>
+
+<article class="content dx-content">
+<pre><code>
+class Connection
+{
+    protected $link;
+    private   $dsn, $username, $password, $register;
+
+    public function __construct($dsn, $username, $password, $register)
+    {
+        $this->dsn = $dsn;
+        $this->username = $username;
+        $this->password = $password;
+        $this->register = $register;
+        $this->connect();
+    }
+
+    private function connect()
+    {
+        try {
+            $this->link = new PDO($this->dsn, $this->username, $this->password);
+        } catch (PDOException $e) {
+            echo 'Falló la conexión: ' . $e->getMessage();
+        }
+    }
+
+    //El método mágico __sleep solo es invocado al hacer instancia a la clase y serializar el objeto final.
+    public function __sleep()
+    {
+        //Representación de propiedades definidas en clase en un array.
+        return [
+            'dsn',
+            'username',
+            'password',
+            'register',
+            ];
+    }
+
+    //El método mágico __wakeup es invocado solo al querer deserializar el objeto recuperando su estado previamente almacenado.
+    public function __wakeup()
+    {
+        $this->connect();
+    }
+}
+
+$connect = new Connection('mysql:dbname=codigoefimero;host=localhost;port=3307', 'root', 'test', 'prueba');
+$serialize = serialize($connect);
+$unserialize = unserialize($serialize);
+var_export($unserialize);</code></pre>
+</article>
+</body>
+</html>
